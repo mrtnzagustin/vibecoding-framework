@@ -113,6 +113,15 @@ Follow the tasks in `tasks.md`, checking them off as you go
 └── package.json
 ```
 
+## Example Feature
+
+See `specs/001-example-feature/` for a complete working example showing:
+- How to structure a spec.md (WHAT and WHY)
+- How to write a plan.md (HOW)
+- How to break down tasks.md (concrete steps)
+
+This example demonstrates a simple logging utility and can serve as a reference when creating your own features. Feel free to delete it once you're familiar with the workflow.
+
 ## Workflow
 
 ### Spec-Kit Workflow
