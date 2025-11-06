@@ -1,54 +1,76 @@
-# VibeCoding Framework Template
+# VibeCoding Framework
 
-A comprehensive template for specification-driven development with AI-powered workflows.
+A specification-driven development template combining **GitHub Spec-Kit** with **VibeCoding workflows** for AI-assisted development.
 
-## What is VibeCoding?
+---
 
-VibeCoding is a development methodology that combines:
-- **Specification-First Development**: Every feature starts with a complete specification before any code is written
-- **AI-Powered Workflows**: Optimized for Claude Code, GitHub Copilot, and other AI coding assistants
-- **Automated Quality Gates**: Pre-commit hooks and CI/CD pipelines enforce quality standards
-- **Documentation as Code**: Specifications, plans, and tasks are version-controlled alongside code
+## What is VibeCoding + Spec-Kit?
+
+This template combines two powerful methodologies:
+
+- **GitHub Spec-Kit**: Structured specification-first development (spec → plan → tasks → implement)
+- **VibeCoding**: AI-first development with small steps and strong guardrails
+
+**Result:** A complete framework for building quality software with AI assistance
 
 ## Features
 
-- 📋 **Spec-Kit Templates**: Structured templates for specifications, plans, and tasks
-- 🤖 **AI Agent Configuration**: Pre-configured instructions for Claude Code and other AI assistants
-- ✅ **Automated Validation**: Husky pre-commit hooks validate specs, tests, and code quality
-- 🔄 **GitHub Actions**: CI/CD workflows enforce specification compliance
-- 📝 **Constitution Framework**: Define and enforce project-specific rules and standards
-- 🛠️ **Helper Scripts**: Bash utilities for creating features, validating prerequisites, and more
+✅ **Spec-Kit Integration**
+- Agent-neutral prompts in `.github/prompts/`
+- Use `/speckit.specify`, `/speckit.plan`, `/speckit.tasks` commands
+- Structured templates for all documentation
+
+✅ **VibeCoding Layer**
+- Claude Code instructions (`.claude/CLAUDE.md`)
+- General AI instructions (`.specify/AI_AGENT_INSTRUCTIONS.md`)
+- Pre-commit hooks with quality gates
+
+✅ **Stack-Agnostic**
+- Works with Node.js, Python, Go, Rust, Java, and more
+- Customizable constitution for your tech stack
+- Multi-language test detection in CI/CD
+
+✅ **Automated Quality**
+- Husky pre-commit hooks validate specs and tests
+- GitHub Actions enforce standards
+- No code without specs
 
 ## Quick Start
 
-### 1. Clone this template
+### 1. Install
 
 ```bash
-git clone https://github.com/your-username/your-project.git
-cd your-project
+npm install
 ```
 
-### 2. Run the initialization script
+This installs Husky and sets up git hooks automatically.
+
+### 2. Initialize Your Project
 
 ```bash
 npm run init-project
 ```
 
-This interactive script will:
-- Configure your project name and description
-- Set up your tech stack preferences
-- Customize the constitution for your needs
-- Initialize git hooks and dependencies
+Answer the prompts for project name, description, and tech stack.
 
-### 3. Start coding with VibeCoding
+### 3. Create Your First Feature
 
 ```bash
-# Create your first feature
 npm run create-feature "User authentication"
-
-# Or use the interactive version
-npm run create-feature
 ```
+
+This creates `specs/001-user-authentication/` with spec.md, plan.md, and tasks.md.
+
+### 4. Fill in the Docs
+
+Edit the three files, or use AI:
+- `/speckit.specify` - Generate spec.md
+- `/speckit.plan` - Generate plan.md
+- `/speckit.tasks` - Generate tasks.md
+
+### 5. Start Coding
+
+Follow the tasks in `tasks.md`, checking them off as you go
 
 ## Directory Structure
 
@@ -57,67 +79,86 @@ npm run create-feature
 ├── .claude/                    # Claude Code configuration
 │   └── CLAUDE.md              # AI assistant instructions
 ├── .github/
-│   └── workflows/             # GitHub Actions workflows
-│       ├── speckit-enforcement.yml
-│       └── speckit-validation.yml
+│   ├── prompts/                # Spec-Kit agent prompts
+│   │   ├── specify.prompt.md
+│   │   ├── plan.prompt.md
+│   │   └── tasks.prompt.md
+│   └── workflows/              # CI/CD
+│       └── spec-kit-validation.yml
 ├── .husky/                    # Git hooks
 │   └── pre-commit            # Pre-commit validation
-├── .specify/                  # Specification framework
+├── .specify/
 │   ├── memory/
-│   │   └── constitution.md   # Project rules and standards
-│   ├── scripts/
-│   │   └── bash/             # Helper scripts
-│   ├── templates/            # Document templates
+│   │   └── constitution.md       # Project rules (customize this!)
+│   ├── scripts/bash/
+│   │   ├── init-project.sh       # Initialize project
+│   │   ├── create-feature.sh     # Create new feature
+│   │   └── validate-spec.sh      # Validate specs
+│   ├── templates/                # Document templates
 │   │   ├── spec-template.md
 │   │   ├── plan-template.md
-│   │   ├── tasks-template.md
-│   │   └── checklist-template.md
-│   ├── AI_AGENT_INSTRUCTIONS.md
-│   └── README.md
-├── specs/                     # Feature specifications
-│   └── XXX-feature-name/     # Each feature gets a numbered folder
+│   │   └── tasks-template.md
+│   ├── AI_AGENT_INSTRUCTIONS.md  # General AI instructions
+│   └── README.md                 # Spec-Kit documentation
+├── specs/                        # Feature specifications
+│   └── NNN-feature-name/
 │       ├── spec.md
 │       ├── plan.md
 │       └── tasks.md
-├── src/                       # Your source code
-├── tests/                     # Your tests
-├── package.json
-├── SETUP.md                   # Detailed setup instructions
-└── INIT_PROMPT.md            # Prompt for AI-assisted setup
+├── src/                          # Your source code (create as needed)
+├── tests/                        # Your tests (create as needed)
+├── README.md                     # This file
+├── SETUP.md                      # Project-specific setup (generated)
+├── INIT_PROMPT.md                # AI initialization prompt
+└── package.json
 ```
 
-## Core Workflow
+## Workflow
 
-### 1. Specify
-Create a detailed specification for your feature using `spec.md`:
-- User stories and personas
-- Functional and non-functional requirements
-- API contracts
-- Success criteria
+### Spec-Kit Workflow
 
-### 2. Plan
-Design the technical implementation in `plan.md`:
-- Architecture decisions
-- Database schema
-- Implementation phases
-- Risk assessment
+1. **Specify** - Define WHAT and WHY
+   ```bash
+   npm run create-feature "Feature name"
+   # Edit specs/NNN-feature-name/spec.md
+   # Or use: /speckit.specify
+   ```
 
-### 3. Break Down
-Split the work into granular tasks in `tasks.md`:
-- Setup tasks
-- Foundation tasks
-- User story tasks
-- Testing tasks
+2. **Plan** - Define HOW
+   ```bash
+   # Edit specs/NNN-feature-name/plan.md
+   # Or use: /speckit.plan
+   ```
 
-### 4. Implement
-Code following the task breakdown with AI assistance
+3. **Tasks** - Break into steps
+   ```bash
+   # Edit specs/NNN-feature-name/tasks.md
+   # Or use: /speckit.tasks
+   ```
 
-### 5. Validate
-Automated checks ensure:
-- All specs exist and are complete
-- Tests pass with required coverage
-- Code meets quality standards
-- Builds succeed
+4. **Implement** - Code following tasks
+   - Check off tasks as you complete them
+   - Write tests alongside code
+   - Update docs as you go
+
+5. **Validate** - Quality gates pass
+   ```bash
+   npm run validate-spec  # Specs exist and valid
+   npm test               # Tests pass
+   npm run lint           # Linting passes
+   ```
+
+### VibeCoding with AI
+
+**With Claude Code:**
+- Opens `.claude/CLAUDE.md` automatically
+- Follows VibeCoding rules
+- Uses Spec-Kit prompts
+
+**With other AI:**
+- Read `.specify/AI_AGENT_INSTRUCTIONS.md`
+- Follow the constitution
+- Use structured prompts
 
 ## Configuration
 
@@ -146,140 +187,163 @@ Edit workflows in `.github/workflows/` to:
 - Set up deployment pipelines
 - Customize enforcement rules
 
-## Available Scripts
+## Available Commands
 
 ```bash
-# Project setup
-npm run init-project          # Interactive project initialization
-npm install                   # Install dependencies and setup hooks
+# Setup
+npm run init-project          # Initialize project (interactive)
+npm install                   # Install deps and setup hooks
 
-# Feature management
-npm run create-feature        # Interactive feature creation
-npm run create-feature "name" # Create feature with name
-npm run validate-spec         # Check current feature compliance
+# Features
+npm run create-feature "name" # Create feature with specs
+npm run validate-spec         # Validate spec structure
 
-# Testing
-npm test                      # Run all tests
-npm run test:coverage         # Generate coverage report
-npm run test:watch            # Run tests in watch mode
-
-# Quality checks
-npm run lint                  # Run linter
-npm run format                # Format code
-npm run typecheck             # Check TypeScript types
+# Quality
+npm test                      # Run tests (configure in package.json)
+npm run lint                  # Run linter (configure in package.json)
+npm run format                # Format code (configure in package.json)
+npm run typecheck             # Type check (configure in package.json)
 ```
 
-## Customization for Your Stack
+## Customization
 
-This template is stack-agnostic. Customize it for your needs:
+### 1. Update Constitution
 
-### For Node.js/TypeScript Projects
-- Update package.json with your dependencies
-- Configure tsconfig.json
-- Set up your preferred testing framework (Jest/Vitest)
+Edit `.specify/memory/constitution.md`:
+- Define your tech stack
+- Set testing requirements
+- Add code quality rules
+- Document your workflow
 
-### For Python Projects
-- Add requirements.txt or pyproject.toml
-- Configure pytest or unittest
-- Adjust pre-commit hook for Python tests
+### 2. Configure package.json
 
-### For Go/Rust/Other
-- Update constitution with language-specific rules
-- Modify pre-commit hook to run language-specific tests
-- Adjust GitHub Actions workflows
+Update scripts for your stack:
+```json
+{
+  "scripts": {
+    "test": "jest",              // or pytest, go test, cargo test
+    "lint": "eslint src/",       // or ruff, golangci-lint
+    "format": "prettier --write .", // or black, gofmt
+    "typecheck": "tsc --noEmit"  // if using TypeScript
+  }
+}
+```
 
-### For Frontend/Backend/Fullstack
-- Structure src/ directory appropriately
-- Add frontend/ and backend/ folders if needed
-- Update scripts for monorepo support
+### 3. Update Pre-Commit Hook
 
-## AI Assistant Integration
+`.husky/pre-commit` runs:
+- `npm run validate-spec`
+- `npm run lint`
+- `npm test`
+
+These use your configured commands from package.json.
+
+### 4. Customize Templates
+
+Edit templates in `.specify/templates/` to match your needs:
+- `spec-template.md`
+- `plan-template.md`
+- `tasks-template.md`
+
+## AI Integration
+
+### Using Spec-Kit Prompts
+
+In any AI tool that supports prompts:
+```
+/speckit.specify
+/speckit.plan
+/speckit.tasks
+```
+
+These load prompts from `.github/prompts/` and generate structured documentation.
 
 ### Using with Claude Code
 
-1. Claude Code automatically reads `.claude/CLAUDE.md` on session start
-2. Follow the workflow it suggests
-3. Use natural language to create features: "Create a new feature for user profiles"
+Claude Code automatically loads `.claude/CLAUDE.md` which:
+- Enforces VibeCoding rules
+- Requires specs before code
+- Uses Spec-Kit workflow
 
-### Using with GitHub Copilot
+### Using with Copilot/Cursor
 
-1. Copilot reads `.specify/AI_AGENT_INSTRUCTIONS.md`
-2. It will suggest code following your constitution
-3. Tests and specs are generated automatically
+These tools read:
+- `.specify/AI_AGENT_INSTRUCTIONS.md`
+- `.specify/memory/constitution.md`
 
-### Using with Cursor
-
-1. Add `.specify/` to your Cursor workspace
-2. Reference constitution in your prompts
-3. Use specs as context for implementation
-
-## Best Practices
-
-### ✅ DO
-- Write specs before code
-- Keep user stories small and testable
-- Update documentation as you go
-- Run tests before committing
-- Follow your constitution strictly
-- Use AI assistants to generate boilerplate
-
-### ❌ DON'T
-- Skip spec creation
-- Commit without tests
-- Bypass pre-commit hooks with --no-verify
-- Mix multiple features in one branch
-- Deviate from tech stack without approval
-- Copy/paste without understanding
+They'll follow your project rules automatically
 
 ## Examples
 
-Check out the `examples/` directory for sample features:
-- `001-user-authentication/`: Complete auth system
-- `002-api-endpoints/`: REST API with validation
-- `003-dashboard/`: Frontend component with tests
+### Create a Feature
 
-## Troubleshooting
-
-### Pre-commit hook failing
 ```bash
-# Check which validation failed
-git commit -v
+$ npm run create-feature "User authentication"
 
-# Run validations manually
-npm run validate-spec
-npm test
+✅ Created feature folder: specs/001-user-authentication
 
-# Fix issues and try again
+Next steps:
+  1. Edit specs/001-user-authentication/spec.md (define WHAT and WHY)
+  2. Edit specs/001-user-authentication/plan.md (define HOW)
+  3. Edit specs/001-user-authentication/tasks.md (break into tasks)
+  4. Start implementing!
 ```
 
-### Spec validation errors
+### Validate Specs
+
 ```bash
-# Ensure you're on a feature branch
-git checkout -b 001-my-feature
+$ npm run validate-spec
 
-# Create required files
-npm run create-feature "my feature"
+🔍 Validating Spec Structure...
 
-# Validate structure
-npm run validate-spec
+Checking: 001-user-authentication
+  ✅ spec.md (45 lines)
+  ✅ plan.md (38 lines)
+  ✅ tasks.md (62 lines)
+
+✅ All feature folders have valid specs!
 ```
 
-### Tests not running
-```bash
-# Check test configuration
-npm test -- --version
+## Pre-Commit Hooks
 
-# Update test scripts in package.json
-# See package.json for examples
-```
+Every commit triggers:
+1. Spec validation (specs exist and non-empty)
+2. Linting (your configured linter)
+3. Tests (your configured test command)
 
-## Contributing
+This ensures quality at commit time, not in CI.
 
-This template evolves with your needs:
-1. Customize constitution for your project
-2. Add project-specific scripts
-3. Extend templates with your patterns
-4. Share improvements back to the template
+---
+
+## CI/CD
+
+GitHub Actions workflow (`.github/workflows/spec-kit-validation.yml`) runs on:
+- Pull requests
+- Pushes to main/develop
+
+It validates:
+- Specs structure
+- Linting passes
+- Tests pass
+
+---
+
+## FAQ
+
+**Q: Do I need to use Node.js?**
+A: No. This template uses npm for scripts, but works with any language. Just configure the test/lint commands for your stack.
+
+**Q: Can I use this without AI?**
+A: Yes! The Spec-Kit workflow works great manually. AI instructions are optional.
+
+**Q: What if I don't like the templates?**
+A: Customize them! Edit files in `.specify/templates/` to match your needs.
+
+**Q: How do I change test coverage requirements?**
+A: Update `.specify/memory/constitution.md` and your test framework config.
+
+**Q: Can I use this with an existing project?**
+A: Yes. Copy the `.specify/`, `.github/`, `.husky/`, and `.claude/` folders. Run `npm install` to set up hooks
 
 ## Resources
 

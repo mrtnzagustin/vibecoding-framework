@@ -1,41 +1,32 @@
 {
   "name": "vibecoding-framework",
   "version": "1.0.0",
-  "description": "A specification-driven development framework with AI-powered workflows",
-  "main": "index.js",
+  "description": "A specification-driven development framework combining GitHub Spec-Kit with VibeCoding workflows",
   "scripts": {
     "prepare": "husky install",
-    "create-feature": "bash .specify/scripts/bash/create-new-feature.sh",
-    "validate-spec": "bash .specify/scripts/bash/check-prerequisites.sh",
-    "test": "echo 'No test command configured. Add your test framework script here.'",
-    "test:coverage": "echo 'No coverage command configured. Add your coverage script here.'",
-    "test:watch": "echo 'No watch command configured. Add your test watch script here.'",
-    "lint": "echo 'No lint command configured. Add your linter script here.'",
-    "format": "echo 'No format command configured. Add your formatter script here.'",
-    "typecheck": "echo 'No typecheck command configured. Add your type checker script here.'",
-    "build": "echo 'No build command configured. Add your build script here.'",
-    "dev": "echo 'No dev command configured. Add your dev server script here.'",
-    "start": "echo 'No start command configured. Add your start script here.'"
+    "init-project": "bash .specify/scripts/bash/init-project.sh",
+    "create-feature": "bash .specify/scripts/bash/create-feature.sh",
+    "validate-spec": "bash .specify/scripts/bash/validate-spec.sh",
+    "lint": "echo '(configure your linter here)' && exit 0",
+    "test": "echo '(configure your test command here)' && exit 0",
+    "format": "echo '(configure your formatter here)' && exit 0",
+    "typecheck": "echo '(configure your typecheck command here)' && exit 0"
   },
   "keywords": [
     "vibecoding",
+    "spec-kit",
     "specification-driven",
     "development",
     "ai",
     "claude",
-    "framework",
+    "github-copilot",
+    "cursor",
     "template"
   ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.6"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "echo 'Running lint-staged. Configure your linting/formatting commands here.'"
-    ]
+    "husky": "^9.1.7"
   },
   "engines": {
     "node": ">=18.0.0",
