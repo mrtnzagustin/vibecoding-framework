@@ -1,0 +1,391 @@
+name: Speckit Structure Validation
+
+on:
+  pull_request:
+    paths:
+      - 'specs/**'
+      - 'backend/**'
+      - 'frontend/**'
+      - 'src/**'
+      - '.specify/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'specs/**'
+      - 'backend/**'
+      - 'frontend/**'
+      - 'src/**'
+      - '.specify/**'
+
+jobs:
+  validate-structure:
+    name: Validate Speckit Structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate spec structure
+        run: |
+          echo "Validating specification structure..."
+          echo ""
+
+          # Check if specs directory exists
+          if [ ! -d "specs" ]; then
+            echo "✅ No specs directory - this is okay for new projects"
+            exit 0
+          fi
+
+          # Find all spec directories
+          SPEC_DIRS=$(find specs -maxdepth 1 -mindepth 1 -type d | sort)
+
+          if [ -z "$SPEC_DIRS" ]; then
+            echo "✅ Specs directory is empty - this is okay"
+            exit 0
+          fi
+
+          echo "Found spec directories:"
+          echo "$SPEC_DIRS"
+          echo ""
+
+          HAS_ERROR=false
+
+          # Validate each spec directory
+          for dir in $SPEC_DIRS; do
+            FEATURE_NAME=$(basename "$dir")
+            echo "Validating: $FEATURE_NAME"
+
+            # Check naming convention (NNN-feature-name)
+            if ! echo "$FEATURE_NAME" | grep -qE '^[0-9]{3}-[a-z0-9-]+$'; then
+              echo "  ⚠️  Warning: Directory name should match pattern NNN-feature-name"
+            fi
+
+            # Check required files
+            REQUIRED_FILES="spec.md plan.md tasks.md"
+
+            for file in $REQUIRED_FILES; do
+              FILE_PATH="$dir/$file"
+
+              if [ ! -f "$FILE_PATH" ]; then
+                echo "  ❌ Missing: $file"
+                HAS_ERROR=true
+              elif [ ! -s "$FILE_PATH" ]; then
+                echo "  ❌ Empty: $file"
+                HAS_ERROR=true
+              else
+                LINE_COUNT=$(wc -l < "$FILE_PATH")
+                echo "  ✅ $file ($LINE_COUNT lines)"
+              fi
+            done
+
+            echo ""
+          done
+
+          if [ "$HAS_ERROR" = true ]; then
+            echo "❌ Spec structure validation failed!"
+            echo ""
+            echo "Each spec directory must contain:"
+            echo "  - spec.md (feature specification)"
+            echo "  - plan.md (implementation plan)"
+            echo "  - tasks.md (task breakdown)"
+            echo ""
+            echo "Use templates from .specify/templates/"
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ All spec directories validated successfully"
+
+  validate-constitution:
+    name: Validate Constitution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check constitution exists
+        run: |
+          echo "Checking for constitution..."
+
+          if [ ! -f ".specify/memory/constitution.md" ]; then
+            echo "❌ Constitution not found!"
+            echo ""
+            echo "Expected file: .specify/memory/constitution.md"
+            echo ""
+            echo "The constitution is required for VibeCoding projects."
+            echo "It defines the rules, standards, and workflows."
+            echo ""
+            echo "Use the template from this repo to create one."
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ Constitution found"
+
+      - name: Validate constitution content
+        run: |
+          echo "Validating constitution content..."
+          echo ""
+
+          CONSTITUTION=".specify/memory/constitution.md"
+          HAS_ERROR=false
+
+          # Check for required sections
+          REQUIRED_SECTIONS=(
+            "Technology Stack"
+            "Testing"
+            "Documentation"
+            "Quality"
+            "Workflow"
+          )
+
+          for section in "${REQUIRED_SECTIONS[@]}"; do
+            if grep -qi "$section" "$CONSTITUTION"; then
+              echo "✅ Found section: $section"
+            else
+              echo "⚠️  Missing recommended section: $section"
+            fi
+          done
+
+          echo ""
+          echo "✅ Constitution content validated"
+
+  validate-tech-stack:
+    name: Validate Tech Stack Compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for forbidden dependencies (Node.js)
+        if: hashFiles('package.json') != '' || hashFiles('backend/package.json') != '' || hashFiles('frontend/package.json') != ''
+        run: |
+          echo "Checking for forbidden dependencies..."
+          echo ""
+
+          # Define forbidden packages (customize based on your constitution)
+          FORBIDDEN_PACKAGES=(
+            # Add your forbidden packages here
+            # Example:
+            # "moment"
+            # "lodash"
+            # "jquery"
+          )
+
+          if [ ${#FORBIDDEN_PACKAGES[@]} -eq 0 ]; then
+            echo "ℹ️  No forbidden packages configured"
+            echo "✅ Configure forbidden packages in this workflow based on your constitution"
+            exit 0
+          fi
+
+          HAS_FORBIDDEN=false
+
+          # Check package.json files
+          for pkg_json in package.json backend/package.json frontend/package.json; do
+            if [ -f "$pkg_json" ]; then
+              echo "Checking $pkg_json..."
+
+              for forbidden in "${FORBIDDEN_PACKAGES[@]}"; do
+                if grep -q "\"$forbidden\"" "$pkg_json"; then
+                  echo "❌ Forbidden dependency found: $forbidden in $pkg_json"
+                  HAS_FORBIDDEN=true
+                fi
+              done
+            fi
+          done
+
+          if [ "$HAS_FORBIDDEN" = true ]; then
+            echo ""
+            echo "❌ Forbidden dependencies detected!"
+            echo ""
+            echo "Remove the forbidden packages or get approval to add them to the constitution."
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ No forbidden dependencies found"
+
+      - name: Check TypeScript strict mode (if TypeScript)
+        if: hashFiles('tsconfig.json') != '' || hashFiles('backend/tsconfig.json') != '' || hashFiles('frontend/tsconfig.json') != ''
+        run: |
+          echo "Checking TypeScript strict mode..."
+          echo ""
+
+          # This is optional - uncomment if your constitution requires strict mode
+          # for tsconfig in tsconfig.json backend/tsconfig.json frontend/tsconfig.json; do
+          #   if [ -f "$tsconfig" ]; then
+          #     echo "Checking $tsconfig..."
+          #     if ! grep -q '"strict": true' "$tsconfig"; then
+          #       echo "⚠️  Warning: strict mode not enabled in $tsconfig"
+          #     else
+          #       echo "✅ Strict mode enabled"
+          #     fi
+          #   fi
+          # done
+
+          echo "ℹ️  TypeScript strict mode check (configure in workflow if needed)"
+
+  validate-test-files:
+    name: Validate Test Files Exist
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for implementation without tests
+        run: |
+          echo "Checking that new implementation files have corresponding tests..."
+          echo ""
+
+          # Get changed files
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_REF="${{ github.event.pull_request.base.sha }}"
+            HEAD_REF="${{ github.sha }}"
+          else
+            BASE_REF="${{ github.event.before }}"
+            HEAD_REF="${{ github.sha }}"
+          fi
+
+          CHANGED_FILES=$(git diff --name-only --diff-filter=A $BASE_REF..$HEAD_REF)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No new files added"
+            exit 0
+          fi
+
+          # Filter implementation files (not tests, not config)
+          IMPL_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(ts|js|tsx|jsx|py|go|rs)$' | grep -v -E '\.(test|spec)\.' | grep -v -E '^(tests?|__tests__|test_)/' || true)
+
+          if [ -z "$IMPL_FILES" ]; then
+            echo "No new implementation files added"
+            exit 0
+          fi
+
+          echo "New implementation files:"
+          echo "$IMPL_FILES"
+          echo ""
+
+          MISSING_TESTS=false
+
+          for impl_file in $IMPL_FILES; do
+            # Skip certain file types that don't need tests
+            if echo "$impl_file" | grep -qE '(dto|entity|entities|interface|type|config|constant|index)\.(ts|js)$'; then
+              echo "⏩ Skipping: $impl_file (DTOs, entities, configs don't need tests)"
+              continue
+            fi
+
+            # Look for corresponding test file
+            BASE_NAME=$(basename "$impl_file" | sed -E 's/\.(ts|js|tsx|jsx|py|go|rs)$//')
+            DIR_NAME=$(dirname "$impl_file")
+
+            # Try different test file patterns
+            POSSIBLE_TEST_FILES=(
+              "$DIR_NAME/$BASE_NAME.test.ts"
+              "$DIR_NAME/$BASE_NAME.test.js"
+              "$DIR_NAME/$BASE_NAME.spec.ts"
+              "$DIR_NAME/$BASE_NAME.spec.js"
+              "$DIR_NAME/__tests__/$BASE_NAME.test.ts"
+              "$DIR_NAME/__tests__/$BASE_NAME.test.js"
+              "tests/$DIR_NAME/$BASE_NAME.test.ts"
+              "tests/$DIR_NAME/test_$BASE_NAME.py"
+              "${impl_file%.go}_test.go"
+            )
+
+            FOUND_TEST=false
+            for test_file in "${POSSIBLE_TEST_FILES[@]}"; do
+              if [ -f "$test_file" ]; then
+                echo "✅ $impl_file → $test_file"
+                FOUND_TEST=true
+                break
+              fi
+            done
+
+            if [ "$FOUND_TEST" = false ]; then
+              echo "⚠️  Missing test: $impl_file"
+              MISSING_TESTS=true
+            fi
+          done
+
+          echo ""
+
+          if [ "$MISSING_TESTS" = true ]; then
+            echo "⚠️  Some implementation files don't have tests"
+            echo ""
+            echo "According to the constitution, all new code should have tests."
+            echo "Please add tests or ensure they exist in the expected locations."
+            echo ""
+            # Make this a warning, not a failure (adjust as needed)
+            echo "Continuing anyway (configure this check in .github/workflows/speckit-validation.yml)"
+          else
+            echo "✅ All implementation files have corresponding tests"
+          fi
+
+  validate-ai-instructions:
+    name: Validate AI Instructions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check AI instructions exist
+        run: |
+          echo "Checking for AI agent instructions..."
+
+          if [ ! -f ".specify/AI_AGENT_INSTRUCTIONS.md" ]; then
+            echo "⚠️  AI agent instructions not found"
+            echo ""
+            echo "Consider creating .specify/AI_AGENT_INSTRUCTIONS.md"
+            echo "to provide guidance for AI coding assistants."
+            echo ""
+          else
+            echo "✅ AI agent instructions found"
+          fi
+
+          if [ ! -f ".claude/CLAUDE.md" ] && [ ! -f "CLAUDE.md" ]; then
+            echo "⚠️  Claude Code instructions not found"
+            echo ""
+            echo "Consider creating .claude/CLAUDE.md"
+            echo "to provide guidance for Claude Code."
+            echo ""
+          else
+            echo "✅ Claude Code instructions found"
+          fi
+
+  summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-structure, validate-constitution, validate-tech-stack, validate-test-files, validate-ai-instructions]
+    if: always()
+
+    steps:
+      - name: Check results
+        run: |
+          echo "==================================="
+          echo "Speckit Validation Summary"
+          echo "==================================="
+          echo ""
+          echo "Structure: ${{ needs.validate-structure.result }}"
+          echo "Constitution: ${{ needs.validate-constitution.result }}"
+          echo "Tech Stack: ${{ needs.validate-tech-stack.result }}"
+          echo "Test Files: ${{ needs.validate-test-files.result }}"
+          echo "AI Instructions: ${{ needs.validate-ai-instructions.result }}"
+          echo ""
+
+          # Fail if critical jobs failed
+          if [[ "${{ needs.validate-structure.result }}" == "failure" ]] || \
+             [[ "${{ needs.validate-constitution.result }}" == "failure" ]] || \
+             [[ "${{ needs.validate-tech-stack.result }}" == "failure" ]]; then
+            echo "❌ Critical validation checks failed!"
+            exit 1
+          fi
+
+          echo "✅ Validation complete!"

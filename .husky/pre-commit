@@ -1,0 +1,263 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 VibeCoding Pre-Commit Validation"
+echo "===================================="
+echo ""
+
+# Get changed files
+CODE_CHANGES=$(git diff --cached --name-only | grep -E '\.(ts|js|tsx|jsx|py|go|rs|java|php|rb|swift|kt)$' || true)
+
+# If no code changes, skip validation
+if [ -z "$CODE_CHANGES" ]; then
+  echo "📄 Documentation-only commit detected"
+  echo "✅ Skipping validation"
+  exit 0
+fi
+
+echo "📝 Code changes detected, running validation..."
+echo ""
+
+# Get current branch name
+BRANCH=$(git branch --show-current)
+echo "🌿 Branch: $BRANCH"
+
+# Extract feature number from branch name (NNN-feature-name format)
+FEATURE_NUM=$(echo "$BRANCH" | grep -oE '^[0-9]{3}')
+
+# If on a feature branch, validate specs exist
+if [ -n "$FEATURE_NUM" ]; then
+  echo ""
+  echo "📋 Validating Specs for Feature $FEATURE_NUM"
+  echo "=============================================="
+
+  # Find spec directory
+  SPEC_DIR=$(find specs -maxdepth 1 -type d -name "${FEATURE_NUM}-*" 2>/dev/null | head -n 1)
+
+  if [ -z "$SPEC_DIR" ]; then
+    echo ""
+    echo "❌ ERROR: No spec directory found for feature $FEATURE_NUM"
+    echo ""
+    echo "Expected directory pattern: specs/${FEATURE_NUM}-feature-name/"
+    echo ""
+    echo "To create specs, run:"
+    echo "  npm run create-feature \"your feature name\""
+    echo ""
+    echo "Or manually create:"
+    echo "  mkdir -p specs/${FEATURE_NUM}-feature-name"
+    echo "  touch specs/${FEATURE_NUM}-feature-name/spec.md"
+    echo "  touch specs/${FEATURE_NUM}-feature-name/plan.md"
+    echo "  touch specs/${FEATURE_NUM}-feature-name/tasks.md"
+    echo ""
+    echo "See .specify/templates/ for template files"
+    echo ""
+    exit 1
+  fi
+
+  echo "✅ Spec directory found: $SPEC_DIR"
+
+  # Check required files
+  REQUIRED_FILES="spec.md plan.md tasks.md"
+  ALL_FILES_VALID=true
+
+  for file in $REQUIRED_FILES; do
+    FILE_PATH="$SPEC_DIR/$file"
+
+    if [ ! -f "$FILE_PATH" ]; then
+      echo "❌ ERROR: Missing required file: $FILE_PATH"
+      ALL_FILES_VALID=false
+    elif [ ! -s "$FILE_PATH" ]; then
+      echo "❌ ERROR: Empty file: $FILE_PATH"
+      echo "   Files must have content, not just exist."
+      ALL_FILES_VALID=false
+    else
+      echo "✅ $file exists and has content"
+    fi
+  done
+
+  if [ "$ALL_FILES_VALID" = false ]; then
+    echo ""
+    echo "❌ Spec validation failed!"
+    echo ""
+    echo "All feature branches must have:"
+    echo "  - spec.md (feature specification)"
+    echo "  - plan.md (implementation plan)"
+    echo "  - tasks.md (task breakdown)"
+    echo ""
+    echo "Use templates from:"
+    echo "  .specify/templates/spec-template.md"
+    echo "  .specify/templates/plan-template.md"
+    echo "  .specify/templates/tasks-template.md"
+    echo ""
+    echo "Or run: npm run create-feature"
+    echo ""
+    exit 1
+  fi
+
+  echo "✅ All spec files validated"
+  echo ""
+else
+  echo "ℹ️  Not a feature branch (no NNN- prefix)"
+  echo "✅ Skipping spec validation"
+  echo ""
+fi
+
+# Run tests
+echo "🧪 Running Tests"
+echo "================"
+echo ""
+
+# Detect project type and run appropriate tests
+TEST_PASSED=false
+
+# Node.js / JavaScript / TypeScript
+if [ -f "package.json" ]; then
+  echo "📦 Node.js project detected"
+
+  # Check if test script exists
+  if grep -q '"test"' package.json; then
+    echo "Running: npm test"
+    npm test -- --passWithNoTests || {
+      echo ""
+      echo "❌ Tests failed!"
+      echo ""
+      echo "Fix the failing tests and try again."
+      echo "Or update your tests if the failures are expected."
+      echo ""
+      exit 1
+    }
+    TEST_PASSED=true
+  else
+    echo "⚠️  No test script found in package.json"
+    echo "ℹ️  Skipping tests"
+    TEST_PASSED=true
+  fi
+fi
+
+# Python
+if [ -f "pyproject.toml" ] || [ -f "setup.py" ] || [ -f "requirements.txt" ]; then
+  if [ "$TEST_PASSED" = false ]; then
+    echo "🐍 Python project detected"
+
+    if command -v pytest >/dev/null 2>&1; then
+      echo "Running: pytest"
+      pytest || {
+        echo ""
+        echo "❌ Tests failed!"
+        echo ""
+        exit 1
+      }
+      TEST_PASSED=true
+    else
+      echo "⚠️  pytest not found"
+      echo "ℹ️  Skipping tests"
+      TEST_PASSED=true
+    fi
+  fi
+fi
+
+# Go
+if [ -f "go.mod" ]; then
+  if [ "$TEST_PASSED" = false ]; then
+    echo "🔵 Go project detected"
+    echo "Running: go test ./..."
+    go test ./... || {
+      echo ""
+      echo "❌ Tests failed!"
+      echo ""
+      exit 1
+    }
+    TEST_PASSED=true
+  fi
+fi
+
+# Rust
+if [ -f "Cargo.toml" ]; then
+  if [ "$TEST_PASSED" = false ]; then
+    echo "🦀 Rust project detected"
+    echo "Running: cargo test"
+    cargo test || {
+      echo ""
+      echo "❌ Tests failed!"
+      echo ""
+      exit 1
+    }
+    TEST_PASSED=true
+  fi
+fi
+
+# Java/Maven
+if [ -f "pom.xml" ]; then
+  if [ "$TEST_PASSED" = false ]; then
+    echo "☕ Maven project detected"
+    echo "Running: mvn test"
+    mvn test || {
+      echo ""
+      echo "❌ Tests failed!"
+      echo ""
+      exit 1
+    }
+    TEST_PASSED=true
+  fi
+fi
+
+# Java/Gradle
+if [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+  if [ "$TEST_PASSED" = false ]; then
+    echo "☕ Gradle project detected"
+    echo "Running: ./gradlew test"
+    ./gradlew test || {
+      echo ""
+      echo "❌ Tests failed!"
+      echo ""
+      exit 1
+    }
+    TEST_PASSED=true
+  fi
+fi
+
+if [ "$TEST_PASSED" = true ]; then
+  echo ""
+  echo "✅ All tests passed!"
+  echo ""
+else
+  echo ""
+  echo "⚠️  No test framework detected"
+  echo "ℹ️  Skipping test execution"
+  echo ""
+  echo "💡 Configure testing in your project:"
+  echo "   - Node.js: Add test script to package.json"
+  echo "   - Python: Install pytest"
+  echo "   - Go: Tests are built-in"
+  echo "   - Rust: Tests are built-in"
+  echo ""
+fi
+
+# Optional: Check test coverage (uncomment if you want to enforce it)
+# echo "📊 Checking Test Coverage"
+# echo "========================="
+# echo ""
+# npm run test:coverage -- --silent || {
+#   echo ""
+#   echo "❌ Coverage below minimum threshold!"
+#   echo ""
+#   echo "Increase test coverage to meet the minimum requirement."
+#   echo "See .specify/memory/constitution.md for coverage thresholds."
+#   echo ""
+#   exit 1
+# }
+# echo "✅ Coverage meets minimum threshold"
+# echo ""
+
+# Success!
+echo "╔════════════════════════════════════════╗"
+echo "║  ✅ Pre-Commit Validation Passed!     ║"
+echo "╚════════════════════════════════════════╝"
+echo ""
+echo "Ready to commit! 🚀"
+echo ""
+echo "⚠️  NEVER bypass this hook with --no-verify"
+echo "   It enforces quality standards for the project"
+echo ""
+
+exit 0
