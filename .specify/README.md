@@ -32,13 +32,13 @@ Spec-Kit is a structured workflow system that requires features to be thoroughly
 ├── scripts/
 │   └── bash/
 │       ├── common.sh            # Shared utilities
-│       ├── create-new-feature.sh # Feature creation script
-│       └── check-prerequisites.sh # Spec validation script
+│       ├── create-feature.sh    # Feature creation script
+│       ├── init-project.sh      # Project initialization script
+│       └── validate-spec.sh     # Spec validation script
 ├── templates/
 │   ├── spec-template.md         # Feature specification template
 │   ├── plan-template.md         # Implementation plan template
-│   ├── tasks-template.md        # Task breakdown template
-│   └── checklist-template.md    # Implementation checklist template
+│   └── tasks-template.md        # Task breakdown template
 ├── AI_AGENT_INSTRUCTIONS.md     # Instructions for AI assistants
 └── README.md                    # This file
 ```
@@ -259,9 +259,11 @@ npm run validate-spec
 **File:** `../.husky/pre-commit`
 
 **Checks on every commit:**
-1. **Spec Validation**: On feature branches (NNN-*), validates spec files exist
-2. **Tests**: Runs test suite, must pass
-3. **Coverage**: Ensures minimum thresholds met (optional, configurable)
+1. **Spec Validation**: Validates that all feature folders have spec.md, plan.md, and tasks.md
+2. **Linting**: Runs your configured linter (must pass)
+3. **Tests**: Runs your configured test suite (must pass)
+
+**Customize:** Edit `.husky/pre-commit` to add coverage checks, branch-specific validation, or other quality gates.
 
 **Cannot be bypassed** without explicit `--no-verify` (discouraged).
 
@@ -269,28 +271,18 @@ npm run validate-spec
 
 ## GitHub Actions
 
-### Workflow 1: Speckit Enforcement
+### Spec & Quality Validation Workflow
 
-**File:** `../.github/workflows/speckit-enforcement.yml`
+**File:** `../.github/workflows/spec-kit-validation.yml`
 
 **Runs on:** Pull requests and pushes to main/develop
 
 **Validates:**
-- Spec files exist for feature branches
-- Tests pass
-- Build succeeds
+- Spec structure is correct (all feature folders have spec.md, plan.md, tasks.md)
+- Linting passes (using your configured linter)
+- Tests pass (using your configured test command)
 
-### Workflow 2: Speckit Validation
-
-**File:** `../.github/workflows/speckit-validation.yml`
-
-**Runs on:** Changes to specs or code
-
-**Validates:**
-- Spec structure is correct
-- Constitution exists and has content
-- No forbidden dependencies
-- Test files exist for new implementation files
+**Customize:** Edit the workflow file to add additional checks like coverage thresholds, forbidden dependencies, or deployment steps
 
 ---
 

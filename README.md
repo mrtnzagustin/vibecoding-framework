@@ -100,6 +100,15 @@ Follow the tasks in `tasks.md`, checking them off as you go
 │   │   └── tasks-template.md
 │   ├── AI_AGENT_INSTRUCTIONS.md  # General AI instructions
 │   └── README.md                 # Spec-Kit documentation
+├── ai-dev/                       # AI Dev Tasks (optional, for complex features)
+│   ├── templates/                # PRD and task templates
+│   │   ├── feature-prd-template.md
+│   │   ├── feature-tasks-template.md
+│   │   └── feature-session-checklist.md
+│   ├── NNN-feature-name/         # Per-feature work area (created as needed)
+│   │   ├── prd.md                # Detailed PRD
+│   │   └── tasks.md              # Granular task breakdown
+│   └── README.md                 # AI Dev Tasks documentation
 ├── specs/                        # Feature specifications
 │   └── NNN-feature-name/
 │       ├── spec.md
@@ -168,6 +177,26 @@ This example demonstrates a simple logging utility and can serve as a reference 
 - Read `.specify/AI_AGENT_INSTRUCTIONS.md`
 - Follow the constitution
 - Use structured prompts
+
+### AI Dev Tasks Mode (Advanced)
+
+**AI Dev Tasks** is an optional workflow layer for complex features that need more granular implementation tracking.
+
+**When to use:**
+- ✅ Complex features with many interdependent parts
+- ✅ Need detailed PRD and granular task breakdown
+- ✅ Want one-task-at-a-time workflow with strong checkpoints
+
+**How it works:**
+1. Start from Spec-Kit (`specs/NNN-feature-name/`)
+2. Create detailed PRD in `ai-dev/NNN-feature-name/prd.md`
+3. Break tasks into 15-30 minute chunks in `ai-dev/NNN-feature-name/tasks.md`
+4. Work one task at a time with frequent commits
+
+**To activate:**
+Tell your AI assistant: _"Work on feature [NNN] in AI Dev Tasks mode"_
+
+**Full documentation:** See [`ai-dev/README.md`](ai-dev/README.md)
 
 ## Configuration
 
