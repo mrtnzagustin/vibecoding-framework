@@ -102,7 +102,7 @@ Follow this priority order when conflicts arise:
 3. **This file** (`.claude/CLAUDE.md`) – Claude Code workflows
 4. **General AI instructions** (`.specify/AI_AGENT_INSTRUCTIONS.md`)
 
-**If anything conflicts with the constitution, the constitution wins.**
+**Rule:** Any conflict is resolved by deferring to `.specify/memory/constitution.md`.
 
 ---
 
